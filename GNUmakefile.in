@@ -21,7 +21,7 @@ endif
 LIBS = @LIBS@ -lpthread -lm
 LDFLAGS = @LDFLAGS@
 
-all: test_atomics mtd mtclient mttest
+all: test_atomics mtd mtclient mttest thread_test
 
 %.o: %.c config.h $(DEPSDIR)/stamp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(DEPCFLAGS) -include config.h -c -o $@ $<
@@ -51,6 +51,10 @@ mtclient: mtclient.o misc.o testrunner.o kvio.o libjson.a
 
 mttest: mttest.o misc.o checkpoint.o $(KVTREES) testrunner.o \
 	kvio.o libjson.a
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(MEMMGR) $(LDFLAGS) $(LIBS)
+
+thread_test: thread_test.o misc.o checkpoint.o $(KVTREES) \
+	testrunner.o kvio.o libjson.a
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(MEMMGR) $(LDFLAGS) $(LIBS)
 
 test_string: test_string.o string.o straccum.o compiler.o
@@ -93,7 +97,7 @@ stamp-h: config.h.in config.status
 	echo > stamp-h
 
 clean:
-	rm -f mtd mtclient mttest test_string test_atomics *.o libjson.a
+	rm -f mtd mtclient mttest test_string test_atomics *.o libjson.a thread_test
 	rm -rf .deps
 
 DEPFILES := $(wildcard $(DEPSDIR)/*.d)
